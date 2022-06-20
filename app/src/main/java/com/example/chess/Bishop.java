@@ -6,104 +6,168 @@ import android.util.Log;
 import java.util.ArrayList;
 
 public class Bishop extends Soldires{
-    private static final String TAG = "Bishop";
 
-    public Bishop(Bitmap bm, int x, int y, String color, Board board) {
-        super("bishop", bm, x, y, color, board);
+    public Bishop(String name, Bitmap bm, int x, int y, String color, Board board) {
+        super(name, bm, x, y, color, board, 300);
     }
 
 
     // מקבל את לוח המשבצות ואת המשבצת שלחצו עליה מחזירה מערך של משבצות שהסוס יכול להתקדם אליהן
     @Override
     public ArrayList<Board> checkMove(ArrayList<Board> board, Board current) {
-        ArrayList<Board>canMove=new ArrayList<>();
         ArrayList<String>collectionName=new ArrayList<>();
-        int width, hieght;
         ArrayList<String>posiblleNames=new ArrayList<>();
-
-        width=current.getrow();
-        hieght=current.getcolumn();
-
-        // רץ יכול להתקדם כמה שהוא רוצה באלכסון
+        ArrayList<Board>canMove=new ArrayList<>();
+        int hieght=current.getcolumn();
+        int width=current.getrow();
         int temp=width+1;
-        // תחתון ימני
-        for(int i=hieght+1; i<9; i++) {
-            if (GameView.getcolorFromName((temp + "" + i), board).equals(this.getColor())) {
-                break;// אם יש על המשבצת שחקן הוא חוסם את הדרך וצריך לצאת מהללולאה
+
+
+        // The soldier can take as many steps as he wants diagonally
+        // BOTTOM RIGHT
+        for(int i=hieght+1; i<9; i++)
+        {
+            //  If a soldier of the same player blocks the soldier who wants to move
+            if (GameView.getcolorFromName((temp + "" + i), board).equals(this.getColor()))
+            {
+                break;
             }
-            if (temp < 9) {
-                // מוודא שאין חריגה מרוחב השולחן
-                posiblleNames.add(temp + "" + i);//מכניס את האלכסון התחתון ימני
-                if (!GameView.getcolorFromName((temp + "" + i), board).equals("none")) { break; }// במידה והחייל מגיע למשבצת עם חייל שך השחקן השני, הוא יוכל לעלות על המשבצת אבל לא להמשיך
+
+            // Make sure there is no deviation from the table width
+            if (temp < 9)
+            {
+                posiblleNames.add(temp + "" + i);
+
+                // If there is a soldier of the opponent in the bottom right, the soldier will eat him and stop
+                if (!GameView.getcolorFromName((temp + "" + i), board).equals("none"))
+                {
+                    break;
+                }
+
                 temp++;
-            } else { break; }
+            }
+            else
+            {
+                break;
+            }
         }
 
-        // עליון ימני
+
         temp=width+1;
-        for(int i=hieght-1; i>0; i--){
-            if(GameView.getcolorFromName((temp+""+i), board).equals(this.getColor())){
-                break;// אם יש על המשבצת שחקן הוא חוסם את הדרך וצריך לצאת מהללולאה
+        // TOP RIGHT
+        for(int i=hieght-1; i>0; i--)
+        {
+            //  If a soldier of the same player blocks the soldier who wants to move
+            if(GameView.getcolorFromName((temp+""+i), board).equals(this.getColor()))
+            {
+                break;
             }
-            if(temp<9){
-                // מוודא שאין חריגה מרוחב השולחן
-                posiblleNames.add(temp+""+i);// אלכסון עליון שמאלי
-                if(!GameView.getcolorFromName((temp+""+i),board).equals("none")) { break; }// במידה והחייל מגיע למשבצת עם חייל שך השחקן השני, הוא יוכל לעלות על המשבצת אבל לא להמשיך
+
+            // Make sure there is no deviation from the table width
+            if(temp<9)
+            {
+                posiblleNames.add(temp+""+i);
+
+                // If there is a soldier of the opponent in the top right, the soldier will eat him and stop
+                if(!GameView.getcolorFromName((temp+""+i),board).equals("none"))
+                {
+                    break;
+                }
+
                 temp++;
-            }else { break; }
+            }
+            else
+            {
+                break;
+            }
         }
 
-        // תחתון שמאלי
+
         temp=width-1;
-        for(int i=hieght+1; i<9; i++) {
-            if (GameView.getcolorFromName((temp + "" + i), board).equals(this.getColor())) {
-                break;// אם יש על המשבצת שחקן הוא חוסם את הדרך וצריך לצאת מהללולאה
+        // BOTTOM LEFT
+        for(int i=hieght+1; i<9; i++)
+        {
+            //  If a soldier of the same player blocks the soldier who wants to move
+            if (GameView.getcolorFromName((temp + "" + i), board).equals(this.getColor()))
+            {
+                break;
             }
-            if (temp > 0) {
-                // מוודא שאין חריגה מרוחב השולחן
-                posiblleNames.add(temp + "" + i);// אלכסון תחתון שמאלי
-                if (!GameView.getcolorFromName((temp + "" + i), board).equals("none")) { break; }// במידה והחייל מגיע למשבצת עם חייל שך השחקן השני, הוא יוכל לעלות על המשבצת אבל לא להמשיך
+
+            // Make sure there is no deviation from the table width
+            if (temp > 0)
+            {
+                posiblleNames.add(temp + "" + i);
+
+                // If there is a soldier of the opponent in the bottom left, the soldier will eat him and stop
+                if (!GameView.getcolorFromName((temp + "" + i), board).equals("none"))
+                {
+                    break;
+                }
+
                 temp--;
-            } else { break; }
+            }
+            else {
+                break;
+            }
         }
-        // עליון שמאלי
+
+
         temp=width-1;
-        for(int i=hieght-1; i>0; i--){
-            if(GameView.getcolorFromName((temp+""+i), board).equals(this.getColor())){
-                break;// אם יש על המשבצת שחקן הוא חוסם את הדרך וצריך לצאת מהללולאה
+        // TOP LEFT
+        for(int i=hieght-1; i>0; i--)
+        {
+            //  If a soldier of the same player blocks the soldier who wants to move
+            if(GameView.getcolorFromName((temp+""+i), board).equals(this.getColor()))
+            {
+                break;
             }
-            if(temp>0){
-                // מוודא שאין חריגה מרוחב השולחן
-                posiblleNames.add(temp+""+i);// אלכסון עליון ימני
-                if(!GameView.getcolorFromName((temp+""+i), board).equals("none")) { break; }// במידה והחייל מגיע למשבצת עם חייל שך השחקן השני, הוא יוכל לעלות על המשבצת אבל לא להמשיך
+
+            // Make sure there is no deviation from the table width
+            if(temp>0)
+            {
+                posiblleNames.add(temp+""+i);
+
+                // If there is a soldier of the opponent in the top left, the soldier will eat him and stop
+                if(!GameView.getcolorFromName((temp+""+i), board).equals("none"))
+                {
+                    break;
+                }
+
                 temp--;
-            }else { break; }
+            }
+            else
+            {
+                break;
+            }
         }
 
-
-        for(int i=0; i<posiblleNames.size(); i++){
-            // שני התנאים הבאים מוודאים שכל המשבצות שעתידות להכנס לרשימה המוחזרת, עונות על תנאי הלוח ולא חורגות ממסגרתו
-            if(posiblleNames.get(i).contains("-")){
-                collectionName.add(posiblleNames.get(i));
-            }
-
-            if((Integer.parseInt(posiblleNames.get(i))/10)>8 || (Integer.parseInt(posiblleNames.get(i))%10)>8){
-                collectionName.add(posiblleNames.get(i));
-
-            } }
-
-        posiblleNames.removeAll(collectionName);
 
         //  בשביל לוודא שבאמת אפשר לזוז למשבצות המצויינות, נוודא שאין שם עוד שחקן בצבע זהה
-        for(int i=0; i<board.size(); i++){
-            for(int j=0; j<posiblleNames.size(); j++){
-                if(posiblleNames.get(j).equals(board.get(i).getName())){
-                    if(!board.get(i).getColorOn().equals(this.getColor())){
+        for(int i=0; i<board.size(); i++)
+        {
+            for(int j=0; j<posiblleNames.size(); j++)
+            {
+                if(posiblleNames.get(j).equals(board.get(i).getName()))
+                {
+                    {
                         canMove.add(board.get(i));
                         break;
 
-                    } } } }
+                    }
+                }
+            }
+        }
 
         return canMove;
+    }
+
+    public Bishop copyPiece(){
+        return new Bishop(
+                this.getName(),
+                this.getBm(),
+                this.getX(),
+                this.getY(),
+                this.getColor(),
+                new Board(this.getBoard()));
     }
 }

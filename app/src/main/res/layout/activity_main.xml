@@ -43,6 +43,7 @@
             app:cardCornerRadius="15dp">
 
             <TextView
+                android:id="@+id/btn_restart"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:alpha="0.9"
@@ -61,6 +62,7 @@
             app:cardCornerRadius="15dp">
 
             <TextView
+                android:id="@+id/btn_back"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:alpha="0.9"

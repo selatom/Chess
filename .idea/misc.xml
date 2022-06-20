@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/tomse/AndroidStudioProjects/Chess/app/src/main/res/drawable/roundcornerbutton.xml" value="0.1" />
+        <entry key="..\:/Users/tomse/AndroidStudioProjects/Chess/app/src/main/res/layout/activity_choose_kind_of_match.xml" value="0.25" />
         <entry key="..\:/Users/tomse/AndroidStudioProjects/Chess/app/src/main/res/layout/activity_main.xml" value="0.25" />
       </map>
     </option>

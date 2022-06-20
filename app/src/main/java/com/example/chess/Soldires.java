@@ -7,60 +7,72 @@ import android.util.Log;
 import java.util.ArrayList;
 
 public class Soldires {
-    private static final String TAG = "Soldires";
-    private String name;
-    private Bitmap bm;
-    private int x, y;
     private String color;
     private Board board;
+    private String name;
+    private final int score;
+    private final Bitmap bm;
+    private int x, y;
 
-    public Soldires(String name, Bitmap bm, int x, int y, String color, Board board) {
+    /**
+     * @param name soldier name
+     * @param bm soldier image
+     * @param x Position on the X-axis
+     * @param y Position on the Y-axis
+     * @param color color of the player
+     * @param board The soldier's square
+     * @param score Score in board evaluation
+     *
+     * Creates a soldier-type object according to the parameters obtained
+     */
+    public Soldires(String name, Bitmap bm, int x, int y, String color, Board board, int score) {
         this.name = name;
+        this.color=color;
+        this.board=board;
+        this.score=score;
         this.bm = bm;
         this.x = x;
         this.y = y;
-        this.color=color;
-        this.board=board;
+    }
+
+    /**
+     * @param soldires soldier-type object
+     *
+     * Creates a soldier-type object with the same parameters as the soldier received as a parameter
+     */
+    public Soldires(Soldires soldires){
+        this.color = soldires.getColor();
+        this.board = soldires.getBoard();
+        this.name = soldires.getName();
+        this.bm = soldires.getBm();
+        this.x = soldires.getX();
+        this.y = soldires.getY();
+
+        this.score = soldires.score;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public Bitmap getBm() {
         return bm;
-    }
-
-    public void setBm(Bitmap bm) {
-        this.bm = bm;
     }
 
     public int getX() {
         return x;
     }
 
-    public void setX(int x) {
-        this.x = x;
-    }
-
     public int getY() {
         return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
     }
 
     public String getColor() {
         return color;
     }
 
-    public void setColor(String color) {
-        this.color = color;
+    public int getScore() {
+        return score;
     }
 
     public Board getBoard() {
@@ -71,111 +83,233 @@ public class Soldires {
         this.board = board;
     }
 
-    public void draw(Canvas canvas){
+    public void setColor(String color) {
+        this.color = color;
+    }
 
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void draw(Canvas canvas){
         canvas.drawBitmap(this.bm, this.x, this.y, null);
     }
 
-    // פעולה שמקבלת את לוח המשחק ומחזירה לוח שבו יש את המשבצות שהשחקן יכול לזוז אליהן
+
+    /**
+     * @param board Array of board squares
+     * @param current The square that was pressed
+     * @return The squares that the soldier on the pressed square can move to
+     */
     public ArrayList<Board>checkMove(ArrayList<Board>board, Board current){
-        ArrayList<Board>canMove=new ArrayList<>();
 
-        for(int i=0; i<board.size(); i++){
-            if(!board.get(i).getColorOn().equals(this.getColor()) || board.get(i).getColorOn().equals("None")){
-                canMove.add(board.get(i));
-            }
-        }
-
-        return canMove;
+        // The action is passed as an inheritance to each object of a specific type of soldier that changes the action accordingly
+        return new ArrayList<>();
     }
 
+
+    /**
+     * @param boards Array of board squares
+     * @param board A square to which you want to move the king
+     * @return Will when the king moves to a square obtained as a parameter he will be threatened
+     */
     // פעולה שמקבלת את לוח המשבצות ומשבצת ספיציפית ומחזירה האם יהיה שח כשאר המלך יזוז למשבצת
     public boolean isChess(ArrayList<Board>boards, Board board){
-        ArrayList<Soldires>soldiresColorNow=new ArrayList<>();
+        ArrayList<Soldires>soldiresColorNow = new ArrayList<>();
         ArrayList<Board>checkSquare;
+        int indexOfOld = 0;
+        int inexOfNew = 0;
+        King king = null;
+        String color;
 
-        // בודק מה הצבע שמשחק ויעתיק לרשימה את רשימת החיילים מהצבע הנגדי
-        if(this.color.equals("black")){
-            // רשימת החיילים הלבנים שיש על הלוח
+        // Copies the current player's soldiers list
+        if(this.color.equals("black"))
+        {
+            // WHITE
             soldiresColorNow.addAll(GameView.arrWhiteSoldires);
-        }else{
-            // רשימת החיילים השחורים על הלוח
+        }
+        else
+        {
+            // BLACK
             soldiresColorNow.addAll(GameView.arrBlackSoldires);
         }
 
-        King king=null;
-        for(int i=0; i<soldiresColorNow.size(); i++){
-            // מוצא את המלך
 
-            if(soldiresColorNow.get(i).getName().equals("King")){
-                king=new King(soldiresColorNow.get(i).bm, soldiresColorNow.get(i).x, soldiresColorNow.get(i).y, soldiresColorNow.get(i).color, soldiresColorNow.get(i).board);
-                soldiresColorNow.remove(i); // יש לבדוק באופן ידני אם המלך מאיים על המלך של השחקן השני עקב חשש ללופ אין-סופי
+        // Finds the king of the current player
+        for(int i=0; i<soldiresColorNow.size(); i++)
+        {
+            if(soldiresColorNow.get(i).getName().contains("king"))
+            {
+                king=new King(soldiresColorNow.get(i).name,
+                              soldiresColorNow.get(i).bm,
+                              soldiresColorNow.get(i).x,
+                              soldiresColorNow.get(i).y,
+                              soldiresColorNow.get(i).color,
+                              soldiresColorNow.get(i).board);
+
+                // Takes the King off the soldiers list
+                soldiresColorNow.remove(i);
                 break;
+            }
+        }
 
-            } }
+        // Preserves the original square values
+        for(int i=0 ;i<boards.size(); i++)
+        {
+            if(boards.get(i)==board)
+            {
+                inexOfNew=i;
+            }
 
-        int inexOfNew=0, indexOfOld=0;
-        String color;
-        for(int i=0 ;i<boards.size(); i++){
-            // שומר את האינדקס של המשבצת שממנה זזים ואת האינדקס של המשבצת שאליה זזים.
-            if(boards.get(i)==board){ inexOfNew=i; }
-
-            if(boards.get(i)==this.board){
+            if(boards.get(i).isEqual(this.board))
+            {
                 boards.get(i).setColorOn("none");
                 indexOfOld=i;
 
-            } }
+            }
+        }
 
         color=boards.get(inexOfNew).getColorOn();
         boards.get(inexOfNew).setColorOn(this.color);
 
-        for(int i=0; i<soldiresColorNow.size(); i++){
-            //בודק בין כל החיילי היריב האם מישהו מהם יכול להגיע למשבצת שאחיה רוצים להזיז את המלך
 
-            checkSquare=soldiresColorNow.get(i).checkMove(boards, soldiresColorNow.get(i).getBoard());
+        // Goes through the list of rival soldiers and checks if any of them can threaten the King in his new location
+        for(Soldires s : soldiresColorNow)
+        {
+            checkSquare=s.checkMove(boards, s.getBoard());
 
-            if(checkSquare.contains(board)){
-                // נחזיר את הלוח לקדמותו
+            if(containBoard(checkSquare, board))
+            {
+                // We will return the board to its original state
                 boards.get(inexOfNew).setColorOn(color);
                 boards.get(indexOfOld).setColorOn(this.color);
                 return true;
 
-            } }
+            }
+        }
 
-        // עכשיו נבדוק שהמלך של היריב לא מאיים בשח
-        ArrayList<String>checkKing=new ArrayList<>();
+        // We will see if the opponent's king can threaten the king of the current player
         assert king != null;
-        int width=king.getBoard().getrow();
+
+        ArrayList<String>checkKing = new ArrayList<>();
         int hieght=king.getBoard().getcolumn();
+        int width=king.getBoard().getrow();
 
-        // משבצות שהמלך של היריב יכול לזוז אליהן
-        checkKing.add(width+1+""+hieght);  checkKing.add(width-1+""+hieght);  checkKing.add(width+""+(hieght+1));  checkKing.add(width+""+(hieght-1));
-        checkKing.add(width+1+""+(hieght+1));  checkKing.add(width-1+""+(hieght+1));  checkKing.add(width+1+""+(hieght-1));  checkKing.add(width-1+""+(hieght-1));
+        // Square of the opposing king
+        checkKing.add(width+1 + "" + hieght);
+        checkKing.add(width-1 + "" + hieght);
+        checkKing.add(width +""+ (hieght+1));
+        checkKing.add(width +""+ (hieght-1));
+        checkKing.add(width+1+""+(hieght+1));
+        checkKing.add(width-1+""+(hieght+1));
+        checkKing.add(width+1+""+(hieght-1));
+        checkKing.add(width-1+""+(hieght-1));
 
-        if(checkKing.contains(board.getName())){
-            // אם המלך של היריב יכול להגיע למשבצת המדוברת
 
-            // נחזיר את הלוח לקדמותו
+        // if the opponent's king can threaten the king of the current player
+        if(checkKing.contains(board.getName()))
+        {
             boards.get(inexOfNew).setColorOn("none");
             boards.get(indexOfOld).setColorOn(this.color);
 
             return  true;
         }
 
-        // נחזיר את הלוח לקדמותו
+        // We will return the board to its original state
         boards.get(inexOfNew).setColorOn("none");
         boards.get(indexOfOld).setColorOn(this.color);
         return  false;
     }
 
-    // פעולה מקבלת את המלך ובודקת אם יש לו לאן ללכת במצב של שח. אם לא, מחזירה אמת אם כן מחזירה שקר
-    public boolean isMat(Soldires soldires){
-        ArrayList<Board>options=soldires.checkMove(GameView.arrBoard, soldires.getBoard());
-        if(options.size()>0){
-            return false;
+
+
+    /**
+     * @param boards Array of board squares
+     * @param player Soldiers list of the current player
+     * @return Is there a threat to the King in his current position
+     */
+    public boolean isChess(ArrayList<Board>boards, ArrayList<Soldires>player){
+        ArrayList<Board>possibleMoves = new ArrayList<>();
+
+        // Builds an array of squares that consists of all the squares that the current player can move into
+        for(Soldires s : player)
+        {
+            possibleMoves.addAll(s.checkMove(boards, s.getBoard()));
         }
 
-        return true;
+        // Is the opponent's king's square included in the list of squares that the current soldier can reach
+        for(Board b : possibleMoves)
+        {
+            if(b.getName().equals(this.board.getName()))
+            {
+                return  true;
+            }
+        }
+
+        return false;
+    }
+
+
+    /**
+     * @param sizeOfMove The number of squares the opponent can move into
+     * @return Returns whether there is a checkmate according to the number of squares the opposing soldier can move to
+     */
+    public boolean isMat(int sizeOfMove){
+        return sizeOfMove == 0;
+    }
+
+
+    /**
+     * @param boards Array of board squares
+     * @param player Soldiers list of the current player
+     * @param sizeOfMove The number of squares the opponent king can move into
+     * @return Has the current player made his opponent checkmate
+     */
+    public boolean isMat(ArrayList<Board>boards, ArrayList<Soldires>player, int sizeOfMove){
+        // CHECK
+        if(isChess(boards, player))
+        {
+            // MATE
+            return sizeOfMove == 0;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param soldires Soldier-type object
+     * @return Is the current soldier equal to the soldier received as a parameter
+     */
+    public boolean equal(Soldires soldires){
+        return this.name.equals(soldires.getName()) ;
+    }
+
+    // An action that copies the received soldier. The action is inherited by a specific type of soldier and changes accordingly
+    public Soldires copyPiece(){
+        return null;
+    }
+
+
+    /**
+     * @param boards Array of squares
+     * @param board Specific square
+     * @return Is the square obtained as a parameter included in the list of squares
+     */
+    public boolean containBoard(ArrayList<Board>boards, Board board){
+        for(Board b :boards)
+        {
+            if(b.isEqual(board))
+                return true;
+        }
+        return false;
     }
 
 }

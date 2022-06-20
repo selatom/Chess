@@ -1,5 +1,8 @@
 package com.example.chess;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,396 +12,577 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
 public class GameView extends View {
-    private static final String TAG = "GameView";
-    private Bitmap bmBoardW, bmBoardB, Bpawn, Bking, Bqueen, Bbishop, Brook, Bknight, Wpawn, Wking, Wqueen, Wbishop, Wrook, Wknight, winnerMessage;
-    public static int sizeOfMap= 125*Constants.SCREEN_WIDTH/1080;
+    public static int sizeOfMap =  125*Constants.SCREEN_WIDTH / 1080;
+    private final  ArrayList<Board> arrCopyBoard = new ArrayList<>();
+    static ArrayList<Soldires>arrWhiteSoldires = new ArrayList<>();
+    static ArrayList<Soldires>arrBlackSoldires = new ArrayList<>();
+    static ArrayList<Soldires>allSoldier = new ArrayList<>();
+    static ArrayList<Board> arrBoard = new ArrayList<>();
 
-    private final int h=8;//משבצות בגובה
-    private final int w =8;//משבצות ברוחב
-
-    static ArrayList<Board> arrBoard =new ArrayList<>();
-    private final  ArrayList<Board> arrCopyBoard =new ArrayList<>();
-    static ArrayList<Soldires>arrWhiteSoldires=new ArrayList<>();
-    static ArrayList<Soldires>arrBlackSoldires=new ArrayList<>();
-    private ArrayList<Soldires>allSoldier=new ArrayList<>();
-
-    private Soldires soldierPressed;
-    private Board WIN;
-
-    static boolean firstmove=true;
-    private boolean isChess=false;
+    static boolean firstmove = true;
+    static Soldires soldierPressed;
+    static String colorNow="white";
     private boolean endMach=false;
-    private String colorNow="white";
 
-    private Handler handler;
-    private Runnable runnable;
 
+    private Bitmap winnerMessage;
+    private Bitmap Bbishop;
+    private Bitmap Bknight;
+    private Bitmap Wbishop;
+    private Bitmap Wknight;
+    private Bitmap Bqueen;
+    private Bitmap Wqueen;
+    private Bitmap Bpawn;
+    private Bitmap Bking;
+    private Bitmap Brook;
+    private Bitmap Wpawn;
+    private Bitmap Wking;
+    private Bitmap Wrook;
+    private final String BLACK = "black";
+    private final String WHITE = "white";
 
     public GameView(Context context, @Nullable AttributeSet attrs) {
 
         super(context, attrs);
 
-        bmBoardB= BitmapFactory.decodeResource(this.getResources(), R.drawable.blackboard);
-        bmBoardB=Bitmap.createScaledBitmap(bmBoardB, sizeOfMap, sizeOfMap, true);
-        bmBoardW= BitmapFactory.decodeResource(this.getResources(), R.drawable.whiteboard);
-        bmBoardW=Bitmap.createScaledBitmap(bmBoardW, sizeOfMap, sizeOfMap, true);
-        winnerMessage=BitmapFactory.decodeResource(this.getResources(), R.drawable.win);
-        winnerMessage=Bitmap.createScaledBitmap(winnerMessage, (5*sizeOfMap), (2*sizeOfMap), true);
+        Bitmap bmBoardB = BitmapFactory.decodeResource (this.getResources(), R.drawable.blackboard);
+        Bitmap bmBoardW = BitmapFactory.decodeResource (this.getResources(), R.drawable.whiteboard);
+        winnerMessage = BitmapFactory.decodeResource (this.getResources(), R.drawable.win);
 
-        Bbishop= BitmapFactory.decodeResource(this.getResources(), R.drawable.bb);
+        winnerMessage = Bitmap.createScaledBitmap (winnerMessage, (5*sizeOfMap), (2*sizeOfMap), true);
+        bmBoardB = Bitmap.createScaledBitmap (bmBoardB, sizeOfMap, sizeOfMap, true);
+        bmBoardW = Bitmap.createScaledBitmap (bmBoardW, sizeOfMap, sizeOfMap, true);
+
+        Bbishop = BitmapFactory.decodeResource (this.getResources(), R.drawable.bb);
         Bbishop=Bitmap.createScaledBitmap(Bbishop, sizeOfMap, sizeOfMap, true);
 
-        Bpawn= BitmapFactory.decodeResource(this.getResources(), R.drawable.bp);
-        Bpawn=Bitmap.createScaledBitmap(Bpawn, sizeOfMap, sizeOfMap, true);
-
-        Bking= BitmapFactory.decodeResource(this.getResources(), R.drawable.bk);
-        Bking=Bitmap.createScaledBitmap(Bking, sizeOfMap, sizeOfMap, true);
-
-        Bqueen= BitmapFactory.decodeResource(this.getResources(), R.drawable.bq);
-        Bqueen=Bitmap.createScaledBitmap(Bqueen, sizeOfMap, sizeOfMap, true);
-
-        Brook= BitmapFactory.decodeResource(this.getResources(), R.drawable.br);
-        Brook=Bitmap.createScaledBitmap(Brook, sizeOfMap, sizeOfMap, true);
-
-        Bknight= BitmapFactory.decodeResource(this.getResources(), R.drawable.bn);
+        Bknight = BitmapFactory.decodeResource (this.getResources(), R.drawable.bn);
         Bknight=Bitmap.createScaledBitmap(Bknight, sizeOfMap, sizeOfMap, true);
 
-        Wpawn= BitmapFactory.decodeResource(this.getResources(), R.drawable.wp);
-        Wpawn=Bitmap.createScaledBitmap(Wpawn, sizeOfMap, sizeOfMap, true);
+        Bpawn = BitmapFactory.decodeResource (this.getResources(), R.drawable.bp);
+        Bpawn = Bitmap.createScaledBitmap(Bpawn, sizeOfMap, sizeOfMap, true);
 
-        Wking= BitmapFactory.decodeResource(this.getResources(), R.drawable.wk);
-        Wking=Bitmap.createScaledBitmap(Wking, sizeOfMap, sizeOfMap, true);
+        Bking = BitmapFactory.decodeResource (this.getResources(), R.drawable.bk);
+        Bking = Bitmap.createScaledBitmap(Bking, sizeOfMap, sizeOfMap, true);
 
-        Wqueen= BitmapFactory.decodeResource(this.getResources(), R.drawable.wq);
-        Wqueen=Bitmap.createScaledBitmap(Wqueen, sizeOfMap, sizeOfMap, true);
+        Bqueen = BitmapFactory.decodeResource(this.getResources(), R.drawable.bq);
+        Bqueen=Bitmap.createScaledBitmap(Bqueen, sizeOfMap, sizeOfMap, true);
 
-        Wbishop= BitmapFactory.decodeResource(this.getResources(), R.drawable.wb);
+        Brook = BitmapFactory.decodeResource (this.getResources(), R.drawable.br);
+        Brook = Bitmap.createScaledBitmap(Brook, sizeOfMap, sizeOfMap, true);
+
+        Wbishop = BitmapFactory.decodeResource (this.getResources(), R.drawable.wb);
         Wbishop=Bitmap.createScaledBitmap(Wbishop, sizeOfMap, sizeOfMap, true);
 
-        Wrook= BitmapFactory.decodeResource(this.getResources(), R.drawable.wr);
-        Wrook=Bitmap.createScaledBitmap(Wrook, sizeOfMap, sizeOfMap, true);
+        Wknight = BitmapFactory.decodeResource  (this.getResources(), R.drawable.wn);
+        Wknight =Bitmap.createScaledBitmap(Wknight, sizeOfMap, sizeOfMap, true);
 
-        Wknight= BitmapFactory.decodeResource(this.getResources(), R.drawable.wn);
-        Wknight=Bitmap.createScaledBitmap(Wknight, sizeOfMap, sizeOfMap, true);
+        Wpawn = BitmapFactory.decodeResource (this.getResources(), R.drawable.wp);
+        Wpawn = Bitmap.createScaledBitmap(Wpawn, sizeOfMap, sizeOfMap, true);
+
+        Wking = BitmapFactory.decodeResource (this.getResources(), R.drawable.wk);
+        Wking = Bitmap.createScaledBitmap(Wking, sizeOfMap, sizeOfMap, true);
+
+        Wqueen = BitmapFactory.decodeResource(this.getResources(), R.drawable.wq);
+        Wqueen=Bitmap.createScaledBitmap(Wqueen, sizeOfMap, sizeOfMap, true);
+
+        Wrook = BitmapFactory.decodeResource (this.getResources(), R.drawable.wr);
+        Wrook = Bitmap.createScaledBitmap(Wrook, sizeOfMap, sizeOfMap, true);
 
         String name;
 
-        //בונה את לוח המשבצות
-        for(int i=0; i<h; i++){
-            for(int j=0; j<w; j++){
-                name=(j+1)+""+(i+1);
 
-                if((i+j)%2==0){//מוצא כל משבצת שנייה
-                    arrBoard.add(new Board(bmBoardB, j*sizeOfMap+Constants.SCREEN_WIDTH/2-(w/2)*sizeOfMap,
-                            i*sizeOfMap+170*Constants.SCREEN_HEIGHT/1920, sizeOfMap, sizeOfMap, name, "black"));
-                }else{
-                    arrBoard.add(new Board(bmBoardW, j*sizeOfMap+Constants.SCREEN_WIDTH/2-(w/2)*sizeOfMap,
-                            i*sizeOfMap+170*Constants.SCREEN_HEIGHT/1920, sizeOfMap, sizeOfMap, name, "white"));
-                }
-            }
+        for(int i = 0; i< 8; i++)
+        {
+          for(int j = 0; j< 8; j++)
+          {
+             name=(j+1)+""+(i+1);
+
+             if((i+j)%2==0)
+             {
+                 // BLACK SQUARE
+                 arrBoard.add(new Board(bmBoardB, j*sizeOfMap+Constants.SCREEN_WIDTH/2-(8 /2)*sizeOfMap,
+              i*sizeOfMap+170*Constants.SCREEN_HEIGHT/1920, sizeOfMap, sizeOfMap, name, BLACK));
+             }
+             else
+             {
+                 // WHITE SQUARE
+                 arrBoard.add(new Board(bmBoardW, j*sizeOfMap+Constants.SCREEN_WIDTH/2-(8 /2)*sizeOfMap,
+              i*sizeOfMap+170*Constants.SCREEN_HEIGHT/1920, sizeOfMap, sizeOfMap, name, WHITE));
+             }
+          }
         }
 
         // רשימה ששומרת על הערכים המקוריים של הלוח
-        for(int i=0; i<arrBoard.size(); i++){
-            arrCopyBoard.add(new Board(arrBoard.get(i).getBm(), arrBoard.get(i).getX(), arrBoard.get(i).getY(), arrBoard.get(i).getWidth(), arrBoard.get(i).getHeight(), arrBoard.get(i).getName(), arrBoard.get(i).getSqColor()));
+        for(int i=0; i<arrBoard.size(); i++)
+        {
+            arrCopyBoard.add(new Board(arrBoard.get(i)));
         }
 
         resetBoard();
-
-        handler=new Handler();
-        runnable= this::invalidate;
     }
 
+
+    /**
+     * @param boards List of all squares
+     * @param name Name of a particular square on the board
+     * @return The color of the soldier standing on the square that corresponds to the given name
+     */
+    static String getcolorFromName(String name, ArrayList<Board>boards){
+        for(int i=0; i<boards.size(); i++)
+        {
+            if(boards.get(i).getName().equals(name))
+            { return boards.get(i).getColorOn(); }
+        }
+        return "";
+    }
+
+    /**
+     * @param canvas
+     * Displays the data at the visual level
+     */
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
         canvas.drawColor(getResources().getColor(R.color.white));
 
-
-        for(int i=0; i< arrBoard.size(); i++){
-            canvas.drawBitmap(arrBoard.get(i).getBm(), arrBoard.get(i).getX(), arrBoard.get(i).getY(), null);
+        for(Board b : arrBoard)
+        {
+            canvas.drawBitmap(
+                    b.getBm(),
+                    b.getX(),
+                    b.getY(),
+                  null);
         }
 
-        for(int i=0; i<arrBlackSoldires.size(); i++){
-            arrBlackSoldires.get(i).draw(canvas);
+        for(Soldires black : arrBlackSoldires)
+        {
+            black.draw(canvas);
         }
-        for(int i=0; i<arrWhiteSoldires.size(); i++){
-            arrWhiteSoldires.get(i).draw(canvas);
+        for(Soldires white : arrWhiteSoldires)
+        {
+            white.draw(canvas);
         }
 
-        if(endMach){
-            MainActivity.gameView.setAlpha(0.4f);
-            canvas.drawBitmap(winnerMessage, (sizeOfMap*2), (sizeOfMap*5), null);
+        if(endMach)
+        {
+            canvas.drawBitmap(winnerMessage,
+                             (sizeOfMap*2),
+                             (sizeOfMap*5),
+                             null);
+        }
+        else if(ChooseKindOfMatch.multi && colorNow.equals(BLACK) )
+        {
+
+            //  Waiting for the current player to finish and then calling the computer
+            Handler handler = new Handler();
+            handler.postDelayed(() -> {
+                final MOveStrategy strategy = new MiniMax(3);
+                final Board aiMove = strategy.execute(arrBoard, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                move(aiMove);
+
+            }, 300);
+
+        }
+
+        for(Soldires s : allSoldier){
+            Log.d(TAG, "draw: "+s.getName()+" "+s.getBoard().getName());
         }
     }
 
-    // מאתחל את הלוח במצב ההתחלתי
+    /**
+     * Build:
+     *   array of white soldiers
+     *   array of black soldiers
+     */
     public void resetBoard(){
         endMach=false;
-        // מאתחל את כל החיילים השחורים
-        Rook rook=new Rook(Brook, arrBoard.get(0).getX(), arrBoard.get(0).getY(), "black", arrBoard.get(0));  arrBlackSoldires.add(rook);
-        arrBoard.get(0).setColorOn("black");  arrBoard.get(0).setSoldires(rook);
-        Knight knight=new Knight(Bknight, arrBoard.get(1).getX(), arrBoard.get(1).getY(), "black", arrBoard.get(1));  arrBlackSoldires.add(knight);
-        arrBoard.get(1).setColorOn("black");  arrBoard.get(1).setSoldires(knight);
-        Bishop bishop=new Bishop(Bbishop, arrBoard.get(2).getX(), arrBoard.get(2).getY(), "black", arrBoard.get(2));  arrBlackSoldires.add(bishop);
-        arrBoard.get(2).setColorOn("black");  arrBoard.get(2).setSoldires(bishop);
-        Queen queen=new Queen(Bqueen, arrBoard.get(3).getX(), arrBoard.get(3).getY(), "black", arrBoard.get(3));  arrBlackSoldires.add(queen);
-        arrBoard.get(3).setColorOn("black");  arrBoard.get(3).setSoldires(queen);
-        King king=new King(Bking, arrBoard.get(4).getX(), arrBoard.get(4).getY(), "black", arrBoard.get(4));  arrBlackSoldires.add(king);
-        arrBoard.get(4).setColorOn("black");  arrBoard.get(4).setSoldires(king);
-        bishop=new Bishop(Bbishop, arrBoard.get(5).getX(), arrBoard.get(5).getY(), "black", arrBoard.get(5));  arrBlackSoldires.add(bishop);
-        arrBoard.get(5).setColorOn("black");  arrBoard.get(5).setSoldires(bishop);
-        knight=new Knight(Bknight, arrBoard.get(6).getX(), arrBoard.get(6).getY(), "black", arrBoard.get(6));  arrBlackSoldires.add(knight);
-        arrBoard.get(6).setColorOn("black");  arrBoard.get(6).setSoldires(knight);
-        rook=new Rook(Brook, arrBoard.get(7).getX(), arrBoard.get(7).getY(), "black", arrBoard.get(7));  arrBlackSoldires.add(rook);
-        arrBoard.get(7).setColorOn("black");  arrBoard.get(7).setSoldires(rook);
-        Pawn pawn=new Pawn(Bpawn, arrBoard.get(8).getX(), arrBoard.get(8).getY(), "black", arrBoard.get(8));  arrBlackSoldires.add(pawn);
-        arrBoard.get(8).setColorOn("black");  arrBoard.get(8).setSoldires(pawn);
-        for(int i=9; i<16; i++){
-            pawn=new Pawn(Bpawn, arrBoard.get(i).getX(), arrBoard.get(i).getY(), "black", arrBoard.get(i));  arrBlackSoldires.add(pawn);
-            arrBoard.get(i).setColorOn("black");  arrBoard.get(i).setSoldires(pawn);
+
+        Rook rook;    Bishop bishop;  King king;
+        Queen queen;  Knight knight;  Pawn pawn;
+
+        // BLACK
+        rook=new Rook("Brook1", Brook, arrBoard.get(0).getX(), arrBoard.get(0).getY(), BLACK, arrBoard.get(0));  arrBlackSoldires.add(rook);
+        knight=new Knight("Bknight1", Bknight, arrBoard.get(1).getX(), arrBoard.get(1).getY(), BLACK, arrBoard.get(1));  arrBlackSoldires.add(knight);
+        bishop=new Bishop("Bbishop1", Bbishop, arrBoard.get(2).getX(), arrBoard.get(2).getY(), BLACK, arrBoard.get(2));  arrBlackSoldires.add(bishop);
+        queen=new Queen("Bqueen", Bqueen, arrBoard.get(3).getX(), arrBoard.get(3).getY(), BLACK, arrBoard.get(3));  arrBlackSoldires.add(queen);
+        king=new King("Bking", Bking, arrBoard.get(4).getX(), arrBoard.get(4).getY(), BLACK, arrBoard.get(4));  arrBlackSoldires.add(king);
+        arrBoard.get(0).setColorOn(BLACK);  arrBoard.get(0).setSoldires(rook);
+        arrBoard.get(1).setColorOn(BLACK);  arrBoard.get(1).setSoldires(knight);
+        arrBoard.get(2).setColorOn(BLACK);  arrBoard.get(2).setSoldires(bishop);
+        arrBoard.get(3).setColorOn(BLACK);  arrBoard.get(3).setSoldires(queen);
+        arrBoard.get(4).setColorOn(BLACK);  arrBoard.get(4).setSoldires(king);
+
+        bishop=new Bishop("Bbishop2", Bbishop, arrBoard.get(5).getX(), arrBoard.get(5).getY(), BLACK, arrBoard.get(5));  arrBlackSoldires.add(bishop);
+        knight=new Knight("Bknight2", Bknight, arrBoard.get(6).getX(), arrBoard.get(6).getY(), BLACK, arrBoard.get(6));  arrBlackSoldires.add(knight);
+        rook=new Rook("Brook2", Brook, arrBoard.get(7).getX(), arrBoard.get(7).getY(), BLACK, arrBoard.get(7));  arrBlackSoldires.add(rook);
+        pawn=new Pawn("Bpawn1", Bpawn, arrBoard.get(8).getX(), arrBoard.get(8).getY(), BLACK, arrBoard.get(8));  arrBlackSoldires.add(pawn);
+        arrBoard.get(5).setColorOn(BLACK);  arrBoard.get(5).setSoldires(bishop);
+        arrBoard.get(6).setColorOn(BLACK);  arrBoard.get(6).setSoldires(knight);
+        arrBoard.get(7).setColorOn(BLACK);  arrBoard.get(7).setSoldires(rook);
+        arrBoard.get(8).setColorOn(BLACK);  arrBoard.get(8).setSoldires(pawn);
+
+        for(int i=9; i<16; i++)
+        {
+            pawn=new Pawn("Bpawn"+(i-7), Bpawn,
+                    arrBoard.get(i).getX(),
+                    arrBoard.get(i).getY(),
+                    BLACK, arrBoard.get(i));
+
+            arrBoard.get(i).setColorOn(BLACK);
+            arrBoard.get(i).setSoldires(pawn);
+            arrBlackSoldires.add(pawn);
         }
+
         allSoldier.addAll(arrBlackSoldires);
 
-        // מאתחל את כל החיילים הלבנים
-        rook=new Rook(Wrook, arrBoard.get(56).getX(), arrBoard.get(56).getY(), "white", arrBoard.get(56));  arrWhiteSoldires.add(rook);
-        arrBoard.get(56).setColorOn("white");  arrBoard.get(56).setSoldires(rook);
-        knight=new Knight(Wknight, arrBoard.get(57).getX(), arrBoard.get(57).getY(), "white", arrBoard.get(57));  arrWhiteSoldires.add(knight);
-        arrBoard.get(57).setColorOn("white");  arrBoard.get(57).setSoldires(knight);
-        bishop=new Bishop(Wbishop, arrBoard.get(58).getX(), arrBoard.get(58).getY(), "white", arrBoard.get(58));  arrWhiteSoldires.add(bishop);
-        arrBoard.get(58).setColorOn("white");  arrBoard.get(58).setSoldires(bishop);
-        queen=new Queen(Wqueen, arrBoard.get(59).getX(), arrBoard.get(59).getY(), "white", arrBoard.get(59));  arrWhiteSoldires.add(queen);
-        arrBoard.get(59).setColorOn("white");  arrBoard.get(59).setSoldires(queen);
-        king=new King(Wking, arrBoard.get(60).getX(), arrBoard.get(60).getY(), "white", arrBoard.get(60));  arrWhiteSoldires.add(king);
-        arrBoard.get(60).setColorOn("white");  arrBoard.get(60).setSoldires(king);
-        bishop=new Bishop(Wbishop, arrBoard.get(61).getX(), arrBoard.get(61).getY(), "white", arrBoard.get(61));  arrWhiteSoldires.add(bishop);
-        arrBoard.get(61).setColorOn("white");  arrBoard.get(61).setSoldires(bishop);
-        knight=new Knight(Wknight, arrBoard.get(62).getX(), arrBoard.get(62).getY(), "white", arrBoard.get(62));  arrWhiteSoldires.add(knight);
-        arrBoard.get(62).setColorOn("white");  arrBoard.get(62).setSoldires(knight);
-        rook=new Rook(Wrook, arrBoard.get(63).getX(), arrBoard.get(63).getY(), "white", arrBoard.get(63));  arrWhiteSoldires.add(rook);
-        arrBoard.get(63).setColorOn("white");  arrBoard.get(63).setSoldires(rook);
-        pawn=new Pawn(Wpawn, arrBoard.get(48).getX(), arrBoard.get(48).getY(), "white", arrBoard.get(48));  arrWhiteSoldires.add(pawn);
-        arrBoard.get(48).setColorOn("white");  arrBoard.get(48).setSoldires(pawn);
-        for(int i=49; i<56; i++){
-            pawn=new Pawn(Wpawn, arrBoard.get(i).getX(), arrBoard.get(i).getY(), "white", arrBoard.get(i));  arrWhiteSoldires.add(pawn);
-            arrBoard.get(i).setColorOn("white");  arrBoard.get(i).setSoldires(pawn);
+
+        // WHITE
+        rook=new Rook("Wrook1", Wrook, arrBoard.get(56).getX(), arrBoard.get(56).getY(), WHITE, arrBoard.get(56));  arrWhiteSoldires.add(rook);
+        knight=new Knight("Wknight1", Wknight, arrBoard.get(57).getX(), arrBoard.get(57).getY(), WHITE, arrBoard.get(57));  arrWhiteSoldires.add(knight);
+        bishop=new Bishop("Wbishop1", Wbishop, arrBoard.get(58).getX(), arrBoard.get(58).getY(), WHITE, arrBoard.get(58));  arrWhiteSoldires.add(bishop);
+        queen=new Queen("Wqueen", Wqueen, arrBoard.get(59).getX(), arrBoard.get(59).getY(), WHITE, arrBoard.get(59));  arrWhiteSoldires.add(queen);
+        king=new King("Wking", Wking, arrBoard.get(60).getX(), arrBoard.get(60).getY(), WHITE, arrBoard.get(60));  arrWhiteSoldires.add(king);
+        arrBoard.get(56).setColorOn(WHITE);  arrBoard.get(56).setSoldires(rook);
+        arrBoard.get(57).setColorOn(WHITE);  arrBoard.get(57).setSoldires(knight);
+        arrBoard.get(58).setColorOn(WHITE);  arrBoard.get(58).setSoldires(bishop);
+        arrBoard.get(59).setColorOn(WHITE);  arrBoard.get(59).setSoldires(queen);
+        arrBoard.get(60).setColorOn(WHITE);  arrBoard.get(60).setSoldires(king);
+
+        bishop=new Bishop("Wbishop2", Wbishop, arrBoard.get(61).getX(), arrBoard.get(61).getY(), WHITE, arrBoard.get(61));  arrWhiteSoldires.add(bishop);
+        knight=new Knight("Wknight2", Wknight, arrBoard.get(62).getX(), arrBoard.get(62).getY(), WHITE, arrBoard.get(62));  arrWhiteSoldires.add(knight);
+        rook=new Rook("Wrook2", Wrook, arrBoard.get(63).getX(), arrBoard.get(63).getY(), WHITE, arrBoard.get(63));  arrWhiteSoldires.add(rook);
+        pawn=new Pawn("Wpawn1", Wpawn, arrBoard.get(48).getX(), arrBoard.get(48).getY(), WHITE, arrBoard.get(48));  arrWhiteSoldires.add(pawn);
+        arrBoard.get(61).setColorOn(WHITE);  arrBoard.get(61).setSoldires(bishop);
+        arrBoard.get(62).setColorOn(WHITE);  arrBoard.get(62).setSoldires(knight);
+        arrBoard.get(63).setColorOn(WHITE);  arrBoard.get(63).setSoldires(rook);
+        arrBoard.get(48).setColorOn("WHITE");  arrBoard.get(48).setSoldires(pawn);
+
+        for(int i=49; i<56; i++)
+        {
+            pawn=new Pawn("Wpawn"+(i-47), Wpawn,
+                    arrBoard.get(i).getX(),
+                    arrBoard.get(i).getY(),
+                    WHITE, arrBoard.get(i));
+
+            arrBoard.get(i).setColorOn(WHITE);
+            arrBoard.get(i).setSoldires(pawn);
+            arrWhiteSoldires.add(pawn);
         }
+
         allSoldier.addAll(arrWhiteSoldires);
+
     }
 
-    // מקבלת שם של משבצת ומחזירה את צבע החייל שעומד על המשבצת
-    static String getcolorFromName(String name, ArrayList<Board>boards){
-        for(int i=0; i<boards.size(); i++){
-            if(boards.get(i).getName().equals(name)){ return boards.get(i).getColorOn(); }
-        }
-        return "";
-    }
+    /**
+     * @param canGo An array of squares that the soldier can walk into in the current round
+     *
+     * Updates the squares that the soldier can reach with a green circle
+     */
+    public void updateBoard(ArrayList<Board>canGo){
 
-    // פעולה שמקבלת מערך של משבצות ומשתנה של אמת או שקר, אם המשתנה הוא אמת זה אומר שצריך לסמן את המקומות שהחייל יוכל ללכת אם לא אז צריך להחזיר את הלוח לקדמותו
-    public void updateBoard(boolean isCorrect, ArrayList<Board>canGo){
-        Bitmap whitemarked, blackmarked;
+        Bitmap whitemarked= BitmapFactory.decodeResource(this.getResources(), R.drawable.whitemarked);
+        Bitmap blackmarked= BitmapFactory.decodeResource(this.getResources(), R.drawable.blackmarked);
 
-        whitemarked= BitmapFactory.decodeResource(this.getResources(), R.drawable.whitemarked);
         whitemarked=Bitmap.createScaledBitmap(whitemarked, sizeOfMap, sizeOfMap, true);
-        blackmarked= BitmapFactory.decodeResource(this.getResources(), R.drawable.blackmarked);
         blackmarked=Bitmap.createScaledBitmap(blackmarked, sizeOfMap, sizeOfMap, true);
 
-        if(isCorrect){
-            for(int i=0; i<arrBoard.size(); i++)  {
-                for(int k=0; k<canGo.size(); k++){
-                    if(canGo.get(k).getName().equals(arrBoard.get(i).getName())) {
-                        if(arrBoard.get(i).getSqColor().equals("black"))
-                            arrBoard.get(i).setBm(blackmarked);
-                        else
-                            arrBoard.get(i).setBm(whitemarked);
+        // Marks the squares that can be accessed
+        if(canGo != null)
+        {
+            for(Board square : arrBoard)
+            {
+                 for(Board move : canGo)
+                 {
+                    if(move.getName().equals(square.getName()))
+                    {
 
-                    } } } }
+                        //BLACK
+                        if(square.getSqColor().equals(BLACK))
+                            square.setBm(blackmarked);
+                        //WHITE
+                        else
+                            square.setBm(whitemarked);
+                    }
+                }
+            }
+        }
 
         this.invalidate();
-
     }
 
-    public void move(Board square){
-        isChess=false;
-
-        for(int i=0; i<arrBoard.size(); i++){
-            // משנה את ערכי המשבמת הישנה
-            if(soldierPressed.getBoard()==arrBoard.get(i)){
-                arrBoard.get(i).setColorOn("none");
-                arrBoard.get(i).setSoldires(null);
-            } }
-
-        if(colorNow.equals("black") && firstmove){
-            firstmove=false;
-        }
-
-        if(square.getSoldires()!=null){
-            // השחקן אכל חייל של היריב, יש לקרוא לפעולת האכילה.
-            eatOpponent(square.getSoldires());
-        }
-
-        for(int i=0; i<allSoldier.size(); i++){
-            // מעדכן את פרטי החייל שזז
-            if(allSoldier.get(i)==soldierPressed){
-                allSoldier.get(i).setX(square.getX());
-                allSoldier.get(i).setY(square.getY());
-                allSoldier.get(i).setBoard(square);
-            } }
-
-        for(int i=0; i<arrBoard.size(); i++){
-            // מעדכן משבצת חדשה
-            if(square==arrBoard.get(i)){
-                arrBoard.get(i).setColorOn(colorNow);
-                arrBoard.get(i).setSoldires(soldierPressed);
-            } }
-
+    /**
+     * @param square A square that the player chose for the soldier to go to
+     * Updates the board according to the move
+     */
+    public void move(Board square)
+    {
         Soldires king=null;
-        if(colorNow.equals("white")){
-            for(int i=0; i<arrBlackSoldires.size(); i++){
-                // מוצא את המלך השחור
-                if(arrBlackSoldires.get(i).getName().equals("King")){
-                    king=arrBlackSoldires.get(i);
+
+        for (Soldires soldires : allSoldier)
+        {
+            if(soldires.equal(soldierPressed))
+            {
+                soldierPressed=soldires;
+                break;
+            }
+         }
+
+        // Updates the values of the old square and the new square
+        for(Board board : arrBoard)
+        {
+            if(board.isEqual(square))
+            {
+                square=board;
+                // EAT OPPONENT
+                if(square.getSoldires()!=null)
+                {
+                    eatOpponent(square.getSoldires());
+                }
+
+                // NEW SQUARE
+                board.setColorOn(colorNow);
+                board.setSoldires(soldierPressed);
+            }
+
+            // OLD SQUARE
+            if(soldierPressed.getBoard().getName().equals(board.getName()))
+            {
+                board.setColorOn("none");
+                board.setSoldires(null);
+            }
+        }
+
+
+
+        // Updating the moving soldier
+        for (Soldires soldires : allSoldier)
+        {
+            if(soldires.equal(soldierPressed))
+            {
+                soldires.setX(square.getX());
+                soldires.setY(square.getY());
+                soldires.setBoard(square);
+                break;
+            }
+        }
+
+
+
+        // Finds the Black King to see if he's threatened
+        if(colorNow.equals(WHITE))
+        {
+            for(Soldires black : arrBlackSoldires)
+            {
+                if(black.getName().equals("Bking"))
+                {
+                    king=black;
                     break;
 
-                } }
-
-            colorNow="black";
-        } else{
-            for(int i=0; i<arrWhiteSoldires.size(); i++){
-                // מוצא את המלך הלבן
-                if(arrWhiteSoldires.get(i).getName().equals("King")){
-                    king=arrWhiteSoldires.get(i);
+                }
+            }
+        }
+        else
+        {
+            // Finds the White King to see if he's threatened
+            for(Soldires white : arrWhiteSoldires)
+            {
+                if(white.getName().equals("Wking"))
+                {
+                    king=white;
                     break;
-
-                } }
-
-            colorNow="white";
+                }
+            }
         }
 
         assert king != null;
-        if(king.isChess(arrBoard, king.getBoard())){
-            if(king.isMat(king)){
-                endMach=true;
-            }
-            isChess=true;
+
+        // END GAME
+        if(king.isChess(arrBoard, king.getBoard()) &&
+            (king.isMat(king.checkMove(arrBoard, king.getBoard()).size())))
+        {
+            endMach=true;
         }
 
+
+        // Updates the colors of the squares
+        for(Board board :arrBoard)
+        {
+            if(board.getSoldires()!=null)
+            {
+                board.setColorOn(board.getSoldires().getColor());
+            }
+        }
+
+
+        if(colorNow.equals(BLACK) && firstmove)
+        {
+            firstmove=false;
+        }
+
+        colorNow = changeColor();
         this.invalidate();
+
     }
 
-    // הפעולה מקבלת חייל שהורגים אותו ומוציאה אותו מרשימת החיילים
+    /**
+     * @return return the color of the next player
+     */
+    public String changeColor(){
+        return colorNow.equals(WHITE) ? BLACK : WHITE;
+    }
+
+    /**
+     * @param soldire A soldier that his opponent ate
+     * the method removes the eaten soldier from the arrays
+     */
     public void eatOpponent(Soldires soldire){
-        if(colorNow.equals("white")){
+
+        // WHITE
+        if(colorNow.equals(WHITE))
+        {
             arrBlackSoldires.remove(soldire);
-        }else{
+        }
+        //BLACK
+        else
+        {
             arrWhiteSoldires.remove(soldire);
         }
 
         allSoldier.remove(soldire);
     }
 
-    // הפעולה מקבלת מערך של משבצות שאליהן יכול החייל להתקדם. היא בודקת את כל המהלכים ומוציאה מהרשימה את המהלכים שבהם ייגרם לשח כנגד מי ששיחק ומחזירה את הרשימה המעודכנת.
+    /**
+     * @param opption An array of squares into which the soldier can move
+     * @return The method goes through the list and removes from it options in which a threat will be posed to the king. Returns the updated list
+     */
     public ArrayList<Board> checkNextMoveChess(ArrayList<Board>opption) {
         ArrayList<Board>collection=new ArrayList<>();
         ArrayList<Board>copyBoard=new ArrayList<>();
-        Board board=null, kingBoard=null;
-        Soldires king=null, oldSoldires=null;
-        int indexSol=0, indexRemove=0;
+
+        Soldires king = null, oldSoldires = null;
+        Board board = null;
+        int indexSol = 0, indexRemove = 0;
         boolean eatSoldier;
 
-        // מעתיק את לוח המשבצות
-        for(int i=0; i<arrBoard.size(); i++){
-            copyBoard.add(new Board(arrBoard.get(i)));
-        }
 
-        // מעדכן את המשבצת החדשה
-        for(int i=0; i<opption.size(); i++){
+        // Checks each of the situations in which the soldier moves to one of the squares in the array
+        for(Board options : opption)
+        {
             eatSoldier=false;
 
-            // בודק האם האופציה היא לאכול שחקן של היריב
-            if(opption.get(i).getSoldires()!=null){
-                eatSoldier=true;
-                oldSoldires=opption.get(i).getSoldires();
-
-                // מתאים את מערך החיילים לפי הצבע שנשחק
-                if(colorNow.equals("white")){
-                    indexRemove=arrBlackSoldires.indexOf(opption.get(i).getSoldires());
-                    arrBlackSoldires.remove(opption.get(i).getSoldires());
-                }else{
-                    indexRemove=arrWhiteSoldires.indexOf(opption.get(i).getSoldires());
-                    arrWhiteSoldires.remove(opption.get(i).getSoldires());
-                } }
-
-            // מעדכן את המשבצת החדשה
-            for(int j=0; j<copyBoard.size(); j++){
-                if(opption.get(i).isEqual(copyBoard.get(j))){
-                    copyBoard.get(j).setColorOn(colorNow);
-                    copyBoard.get(j).setSoldires(soldierPressed);
-
-                    break;
-                } }
-
-            // מעדכן את המשבצת הישנה
-            for(int j=0; j<copyBoard.size(); j++){
-                if(soldierPressed.getBoard().isEqual(copyBoard.get(j))){
-                    copyBoard.get(j).setColorOn("none");
-                    copyBoard.get(j).setSoldires(null);
-
-                    break;
-                } }
-
-            // מעדכן את החייל
-            for(int j=0; j<allSoldier.size(); j++){
-                if(soldierPressed==allSoldier.get(j)){
-                    indexSol=j;
-                    board=allSoldier.get(j).getBoard();
-                    allSoldier.get(j).setBoard(opption.get(i));
-                } }
-
-            if(colorNow.equals("black")){
-                for(int j=0; j<arrBlackSoldires.size(); j++){
-                    // מוצא את המלך השחור
-                    if(arrBlackSoldires.get(j).getName().equals("King")){
-                        king=arrBlackSoldires.get(j);
-                        break;
-
-                    } }
-
-
-            } else{
-                for(int j=0; j<arrWhiteSoldires.size(); j++){
-                    // מוצא את המלך הלבן
-                    if(arrWhiteSoldires.get(j).getName().equals("King")){
-                        king=arrWhiteSoldires.get(j);
-                        break;
-
-                    } } }
-            assert king != null;
-
-            // מוצא את המשבצת של המלך
-            for(int j=0; j<copyBoard.size(); j++){
-                if(copyBoard.get(j).isEqual(king.getBoard())){
-                    kingBoard=copyBoard.get(j);
-                    break;
-                } }
-
-            if(king.isChess(copyBoard, kingBoard)){
-                collection.add(opption.get(i));
+            // copy the board list
+            copyBoard.clear();
+            for(Board b : arrBoard)
+            {
+                copyBoard.add(new Board(b));
             }
 
-            // במידה והאופציה היא לאכול חייל של היריב התנאי יתממש ויחזיר את הפרטי החייל לקדמותו
-            if(eatSoldier){
-                if(colorNow.equals("white")){
+
+            // EAT OPPONENT
+            if(options.getSoldires()!=null)
+            {
+                eatSoldier=true;
+                oldSoldires=options.getSoldires();
+
+                // Keeps the index of the soldier we ate and removes it from the arrays temporarily
+                if(colorNow.equals(WHITE))
+                {
+                    indexRemove = arrBlackSoldires.indexOf(options.getSoldires());
+                    arrBlackSoldires.remove(options.getSoldires());
+                }
+                else
+                {
+                    indexRemove  =arrWhiteSoldires.indexOf(options.getSoldires());
+                    arrWhiteSoldires.remove(options.getSoldires());
+                }
+            }
+
+
+            // מעדכן את המשבצת החדשה
+            for(Board square : copyBoard)
+            {
+                // NEW
+                if(options.isEqual(square))
+                {
+                    square.setColorOn(colorNow);
+                    square.setSoldires(soldierPressed);
+                }
+                // OLD
+                if(soldierPressed.getBoard().isEqual(square))
+                {
+                    square.setColorOn("none");
+                    square.setSoldires(null);
+                }
+            }
+
+
+            // Updating the soldier
+            for(int j=0; j<allSoldier.size(); j++)
+            {
+                if(soldierPressed==allSoldier.get(j))
+                {
+                    indexSol=j;
+                    board=allSoldier.get(j).getBoard();
+                    allSoldier.get(j).setBoard(options);
+                }
+            }
+
+            // Find the king
+            if(colorNow.equals("black"))
+            {
+                for(Soldires black : arrBlackSoldires)
+                {
+                    // BLACK
+                    if(black.getName().contains("Bking"))
+                    {
+                        king=black;
+                        break;
+
+                    }
+                }
+            }
+            else
+            {
+                for(Soldires white : arrWhiteSoldires)
+                {
+                    // WHITE
+                    if(white.getName().contains("Wking"))
+                    {
+                        king=white;
+                        break;
+
+                    }
+                }
+            }
+
+            assert king != null;
+
+            if(king.isChess(copyBoard, king.getBoard())){
+                collection.add(options);
+            }
+
+            // Restores the board to its original state
+            if(eatSoldier)
+            {
+                // BLACK
+                if(colorNow.equals("white"))
+                {
                     arrBlackSoldires.add(indexRemove, oldSoldires);
-                }else{
+                }
+                //WHITE
+                else
+                {
                     arrWhiteSoldires.add(indexRemove, oldSoldires);
-                } }
+                }
+            }
 
             allSoldier.get(indexSol).setBoard(board);
         }
@@ -409,55 +593,91 @@ public class GameView extends View {
     }
 
 
-
-
-    //מטפלת במקרה של נגיעה בלוח
+    /**
+     * @param event event of touching the screen
+     * @return Manages the game according to the player's קהקמא
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            ArrayList<Board>canGo= new ArrayList<>();
-            ArrayList<Board>canRemove=new ArrayList<>();
-            float x,y;
+        ArrayList<Board>canRemove = new ArrayList<>();
+        ArrayList<Board>canGo;
+        float x,y;
 
+        // A condition that checks whether it is a player against a player or a player against a computer. If it's a player against a computer, the condition will only come true if it's the white turn
+        if (event.getAction() == MotionEvent.ACTION_DOWN && (!ChooseKindOfMatch.multi) || event.getAction() == MotionEvent.ACTION_DOWN && (ChooseKindOfMatch.multi) && colorNow.equals("white"))
+        {
             x=event.getX();
             y=event.getY();
 
-            for(int j=0; j<arrBoard.size(); j++){
-                if(arrBoard.get(j).isMarked()){
-                    // clear the board
+            for(int j=0; j<arrBoard.size(); j++)
+            {
+                if(arrBoard.get(j).isMarked())
+                {
+                    // Deletes marked squares from the board
                     canRemove.add(arrBoard.get(j));
                     arrBoard.get(j).setBm(arrCopyBoard.get(j).getBm());
                     arrBoard.get(j).setMarked(false);
 
-                } }
+                }
+            }
 
-            for(int i=0; i<arrBoard.size(); i++){
-                if(x>=arrBoard.get(i).getX() && x<arrBoard.get(i).getX()+sizeOfMap && y>=arrBoard.get(i).getY() && y<arrBoard.get(i).getY()+sizeOfMap){
-                    // מאתר את המשבצת שבה התרחשה הנגיעה
-
-                    if(canRemove.contains(arrBoard.get(i))){
-                        // אם הנגיעה גורמת לחייל לזוז
-                        move(arrBoard.get(i));
+            // Handles the condition of a touch event
+            for(Board board : arrBoard)
+            {
+                // Locates the square that the player has selected
+                if(x >= board.getX() && x < board.getX() + sizeOfMap && y >= board.getY() && y < board.getY() + sizeOfMap)
+                {
+                    // MOVE
+                    if(canRemove.contains(board))
+                    {
+                        move(board);
 
                     }
 
-                    // תנאי שמוודא שהחייל שנלחץ הוא מהצבע שתורו הגיע
-                    if(arrBoard.get(i).getColorOn().equals(colorNow)){
+                    // Make sure that a soldier who is pressed belongs to the current player
+                    if(board.getColorOn().equals(colorNow))
+                    {
+                        soldierPressed=board.getSoldires();
+                        canGo=checkNextMoveChess(board.getSoldires().checkMove(arrBoard, board));
 
-                        soldierPressed=arrBoard.get(i).getSoldires();
-                        //בדיקה שהחייל שמעוניין לזוז מהצבע שתורו
-                        canGo=checkNextMoveChess(arrBoard.get(i).getSoldires().checkMove(arrBoard, arrBoard.get(i)));
+                        // MARK SQUARE
+                        for(int j=0; j<canGo.size(); j++)
+                        {
+                            canGo.get(j).setMarked(true);
+                        }
 
-
-                        for(int j=0; j<canGo.size(); j++){canGo.get(j).setMarked(true);}// מסמן בכל המשבצות האפשריות שהן ממורקרות
-
-                        updateBoard(true, canGo);
+                        updateBoard( canGo );
                         break;
-                    }else{updateBoard(false, canGo=new ArrayList<>()); }
+                    }
+                    // Deletes the marked squares
+                    else
+                    {
+                        updateBoard(null );
+                    }
 
-                } } }
+                }
+            }
+        }
 
+        // UPDATE SQUARE COLOR
+        for(Board board :arrBoard)
+        {
+            if(board.getSoldires()!=null)
+            {
+                board.setColorOn(board.getSoldires().getColor());
+            }
+        }
 
         return true;
     }
+
 }
+
+
+
+//            // מוצא את המשבצת של המלך
+//            for(int j=0; j<copyBoard.size(); j++){
+//                if(copyBoard.get(j).isEqual(king.getBoard())){
+//                    kingBoard=copyBoard.get(j);
+//                    break;
+//                } }

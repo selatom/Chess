@@ -8,94 +8,134 @@ import java.util.ArrayList;
 public class Pawn extends Soldires{
     private static final String TAG = "Pawn";
 
-    public Pawn(Bitmap bm, int x, int y, String color, Board board) {
-        super("pawn", bm, x, y, color, board);
+    public Pawn(String name, Bitmap bm, int x, int y, String color, Board board) {
+        super(name, bm, x, y, color, board, 20);
+
     }
 
-
-
-    // מקבל את לוח המשבצות ואת המשבצת שלחצו עליה מחזירה מערך של משבצות שהסוס יכול להתקדם אליהן
+    /**
+     * @param board Square list of the board
+     * @param current The specific square from which you want to move the soldier
+     * @return A list of squares into which the soldier can be moved
+     */
     @Override
     public ArrayList<Board> checkMove(ArrayList<Board> board, Board current) {
-        ArrayList<Board>canMove=new ArrayList<>();
         ArrayList<String>collectionName=new ArrayList<>();
-
-        int width, hieght;
         ArrayList<String>posiblleNames=new ArrayList<>();
+        ArrayList<Board>canMove=new ArrayList<>();
+        int hieght=current.getcolumn();
+        int width=current.getrow();
 
+        // A Pawn can move one step forward except in the first line where he can move two steps forward. In addition, if there is a rival soldier diagonally to the Pawn he will be able to eat him.
 
-        width=current.getrow();
-        hieght=current.getcolumn();
+        // We will add the possible squares in case of eating the opponent - one step diagonally
+        posiblleNames.add((width+1)+""+(hieght-1));
+        posiblleNames.add((width-1)+""+(hieght-1));
+        posiblleNames.add((width+1)+""+(hieght+1));
+        posiblleNames.add((width-1)+""+(hieght+1));
 
-        // חייל יכול ללכת רק צעד אחד קדימה אלה אם זה התור הראשון ואז זה שני צעדים קדימה או במקרה של אכילה, גם באלכסון
-        posiblleNames.add((width+1)+""+(hieght-1));  posiblleNames.add((width-1)+""+(hieght-1));  posiblleNames.add((width+1)+""+(hieght+1));  posiblleNames.add((width-1)+""+(hieght+1));
+        // Checks whether the soldier really has the option to eat the opponent. If not he removes the steps diagonally from the list
+        for(Board go : board)
+        {
+            for(String name : posiblleNames)
+            {
+                if(name.equals(go.getName()))
+                {
+                    if(go.getColorOn().equals(this.getColor()) || go.getColorOn().equals("none"))
+                    {
+                        collectionName.add(name);
+                    }
 
-        // לולאה שבודקת האם באמת יש לחייל אופציה לאכול חייל של השחקן השני
-        for(int i=0; i<board.size(); i++){
-            for(int j=0; j<posiblleNames.size(); j++){
-                if(posiblleNames.get(j).equals(board.get(i).getName())){
-                    if(board.get(i).getColorOn().equals(this.getColor()) || board.get(i).getColorOn().equals("none")) { collectionName.add(posiblleNames.get(j)); }
-
-                } } }
+                }
+            }
+        }
 
         posiblleNames.removeAll(collectionName);
 
-        // נוסיך למהלכים האפשריים את האופציות שחישבנו עד כה
-        for(int i=0; i<board.size(); i++){
-            for(int j=0; j<posiblleNames.size(); j++){
-                if(posiblleNames.get(j).equals(board.get(i).getName())){
-                        canMove.add(board.get(i));
+        // We will add to the array the options we have found so far
+        for(Board go : board)
+        {
+            for(String name : posiblleNames)
+            {
+                if(name.equals(go.getName()))
+                {
+                        canMove.add(go);
                         break;
 
-                    } } }
+                }
+            }
+        }
+
         posiblleNames.clear();
 
-        if(this.getColor().equals("black")){
-            // במידה והשחור משחק, בשביל לדעת לאיזה כיוון הוא זז צריך לדעת את הצבע שלו
+        // Find which player is playing in the current queue to know the direction of his steps
+        if(this.getColor().equals("black"))
+        {
+            //BLACK
             posiblleNames.add(width+""+(hieght+1));
-            if(GameView.firstmove){posiblleNames.add((width)+""+(hieght+2));}
-        }else{
-            // במידה והלבן משחק, בשביל לדעת לאיזה כיוון הוא זז צריך לדעת את הצבע שלו
+
+            if(GameView.firstmove)
+            {
+                posiblleNames.add((width)+""+(hieght+2));
+            }
+        }
+        else
+        {
+            // WHITE
             posiblleNames.add(width+""+(hieght-1));
-            if(GameView.firstmove){posiblleNames.add(width+""+(hieght-2));} }
+
+            if(GameView.firstmove)
+            {
+                posiblleNames.add(width+""+(hieght-2));
+            }
+        }
 
         collectionName=new ArrayList<>();
-        for(int i=0; i<posiblleNames.size(); i++){
 
-            // שני התנאים הבאים מוודאים שכל המשבצות שעתידות להכנס לרשימה המוחזרת, עונות על תנאי הלוח ולא חורגות ממסגרתו
-            if(posiblleNames.get(i).contains("-")){
+        // The following two conditions ensure that all the squares that are to be included in the returned list meet the conditions of the board and do not exceed its scope.
+        for(int i=0; i<posiblleNames.size(); i++)
+        {
+            if(posiblleNames.get(i).contains("-"))
+            {
+                collectionName.add(posiblleNames.get(i));
+
+            }
+            else if((Integer.parseInt(posiblleNames.get(i))/10)>8 || (Integer.parseInt(posiblleNames.get(i))%10)>8)
+            {
                 collectionName.add(posiblleNames.get(i));
             }
+        }
 
-            if((Integer.parseInt(posiblleNames.get(i))/10)>8 || (Integer.parseInt(posiblleNames.get(i))%10)>8){
-                collectionName.add(posiblleNames.get(i));
-            } }
+
         posiblleNames.removeAll(collectionName);
 
-        // במצב שהחייל הולך ישר, אסור שיהיה שם חייל של היריב
-        for(int i=0; i<board.size(); i++){
-            for(int j=0; j<posiblleNames.size(); j++){
-                // החייל יוכל להתקדם ישר בתנאי שלא יהיה שם חייל שלו או של יריבו. נבדוק זאת בתנאי ואם זה עונה על התנאי, נוסיף אותו למהלכים אפשריים
-                if(posiblleNames.get(j).equals(board.get(i).getName())){
-                    if(board.get(i).getColorOn().equals("none")) {
+        //  We will convert all the names of the possible squares to a square type object
+        for(int i=0; i<board.size(); i++)
+        {
+            for(int j=0; j<posiblleNames.size(); j++)
+            {
+                if(posiblleNames.get(j).equals(board.get(i).getName()))
+                {
+                    if(board.get(i).getColorOn().equals("none"))
+                    {
                         canMove.add(board.get(i));
                         break;
 
-                    } } } }
-        // posiblleNames.removeAll(collectionName);
-
-//        //  בשביל לוודא שבאמת אפשר לזוז למשבצות המצויינות, נוודא שאין שם עוד שחקן בצבע זהה
-//        for(int i=0; i<board.size(); i++){
-//            for(int j=0; j<posiblleNames.size(); j++){
-//                if(posiblleNames.get(j).equals(board.get(i).getName())){
-//                    if(!board.get(i).getColorOn().equals(this.getColor())){
-//                        canMove.add(board.get(i));
-//                        break;
-//
-//                    } } } }
+                    }
+                }
+            }
+        }
 
         return canMove;
     }
 
-
+    public Pawn copyPiece(){
+        return new Pawn(
+                this.getName(),
+                this.getBm(),
+                this.getX(),
+                this.getY(),
+                this.getColor(),
+                new Board(this.getBoard()));
+    }
 }

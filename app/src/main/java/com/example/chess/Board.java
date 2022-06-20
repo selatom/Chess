@@ -2,26 +2,31 @@ package com.example.chess;
 
 import android.graphics.Bitmap;
 
+import java.util.ArrayList;
+
 public class Board {
-    private Bitmap bm;
-    private int x, y, width, height;
-    private String colorOn;
-    private String name;
+    private final int x;
+    private final int y;
+    private int width;
+    private final int height;
     private Soldires soldires;
     private boolean marked;
-    private String sqColor;
+    private final String sqColor;
+    private String colorOn;
+    private String name;
+    private Bitmap bm;
+
 
     public Board(Bitmap bm, int x, int y, int width, int height, String name, String sqColor) {
+        this.sqColor = sqColor;
+        this.colorOn = "none";
+        this.height = height;
+        this.marked = false;
+        this.width = width;
+        this.name = name;
         this.bm = bm;
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
-        this.colorOn="none";
-        this.name=name;
-        this.marked=false;
-        this.sqColor=sqColor;
-
     }
 
     public Board(Board board){
@@ -57,40 +62,38 @@ public class Board {
         return height;
     }
 
-    public void setBm(Bitmap bm) {
-        this.bm = bm;
+    public String getSqColor() {
+        return sqColor;
     }
 
-    public void setX(int x) {
-        this.x = x;
+    public int getcolumn(){
+        return (Integer.parseInt(this.name)%10);
     }
 
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
+    public int getrow(){
+        return (Integer.parseInt(this.name)/10);
     }
 
     public String getColorOn() {
         return colorOn;
     }
 
-    public void setColorOn(String colorOn) {
-        this.colorOn = colorOn;
-    }
-
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
     public Soldires getSoldires() {
         return soldires;
+    }
+
+    public void setBm(Bitmap bm) {
+        this.bm = bm;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setColorOn(String colorOn) {
+        this.colorOn = colorOn;
     }
 
     public void setSoldires(Soldires soldires) {
@@ -109,26 +112,35 @@ public class Board {
         this.marked = marked;
     }
 
-    public String getSqColor() {
-        return sqColor;
-    }
 
-    public void setSqColor(String sqColor) {
-        this.sqColor = sqColor;
-    }
 
-    public int getcolumn(){
-        return (Integer.parseInt(this.name)%10);
-    }
 
-    public int getrow(){
-        return (Integer.parseInt(this.name)/10);
-    }
 
+
+    /**
+     * @param board Specific square
+     * @return Is the obtained square as a parameter equal to the current square
+     */
     public boolean isEqual(Board board){
-        if(board.getName().equals(this.name))
-            return true;
-        return false;
+        return board.getName().equals(this.name);
+    }
+
+
+    /**
+     * @param name name of square
+     * @param boards List of squares of the board
+     * @return Returns the square from the array of squares that corresponds to the name obtained as a parameter
+     */
+    public static Board getBoardFromName(String name, ArrayList<Board>boards){
+        for(int i=0; i<boards.size(); i++)
+        {
+            if(boards.get(i).getName().equals(name))
+            {
+                return boards.get(i);
+            }
+        }
+
+        return null;
     }
 }
 

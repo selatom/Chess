@@ -8,78 +8,136 @@ import java.util.ArrayList;
 public class Rook extends Soldires{
     private static final String TAG = "Rook";
 
-    public Rook(Bitmap bm, int x, int y, String color, Board board) {
-        super("rook", bm, x, y, color, board);
+    public Rook(String name, Bitmap bm, int x, int y, String color, Board board) {
+        super(name, bm, x, y, color, board, 600);
     }
 
-
-    // מקבל את לוח המשבצות ואת המשבצת שלחצו עליה מחזירה מערך של משבצות שהסוס יכול להתקדם אליהן
+    /**
+     * @param board Square list of the board
+     * @param current The specific square from which you want to move the soldier
+     * @return A list of squares into which the soldier can be moved
+     */
     @Override
     public ArrayList<Board> checkMove(ArrayList<Board> board, Board current) {
-        ArrayList<Board>canMove=new ArrayList<>();
-        ArrayList<String>collectionName=new ArrayList<>();
-        int width, hieght;
-        ArrayList<String>posiblleNames=new ArrayList<>();
+        ArrayList<String>collectionName = new ArrayList<>();
+        ArrayList<String>posiblleNames = new ArrayList<>();
+        ArrayList<Board>canMove = new ArrayList<>();
+        int hieght = current.getcolumn();
+        int width = current.getrow();
 
-        width=current.getrow();
-        hieght=current.getcolumn();
+        // We will add to the array the squares that the Rook can go to. The Rook can move in a straight line in any direction
+        // TOP ROW
+        for(int i=hieght+1; i<9; i++)
+        {
+            // If a soldier of the same player blocks the soldier who wants to move
+            if(GameView.getcolorFromName((width+""+(i)), board).equals(this.getColor()))
+            {
+                break;
+            }
+            posiblleNames.add(width+""+(i));
 
-        // צריח יכול ללכת כמה שהוא רוצה בתנאי שזה בקו ישר
-        for(int i=hieght+1; i<9; i++){
-            if(GameView.getcolorFromName((width+""+(i)), board).equals(this.getColor())){
-                break;// אם יש על המשבצת שחקן מאותו הצבע הוא חוסם את הדרך וצריך לצאת מהללולאה
+            // If there is a soldier of the opponent in the top row, the soldier will eat him and stop
+            if(!GameView.getcolorFromName((width+""+(i)), board).equals("none"))
+            {
+                break;
             }
-            posiblleNames.add(width+""+(i));// מוסיף את כל המשבצות בשורה למעלה
-            if(!GameView.getcolorFromName((width+""+(i)), board).equals("none")) { break; }// במידה והחייל מגיע למשבצת עם חייל שך השחקן השני, הוא יוכל לעלות על המשבצת אבל לא להמשיך
-        }
-        for(int i=hieght-1; i>0; i--){
-            if(GameView.getcolorFromName((width+""+(i)), board).equals(this.getColor())){
-                break;// אם יש על המשבצת שחקן מאותו הצבע הוא חוסם את הדרך וצריך לצאת מהללולאה
-            }
-            posiblleNames.add(width+""+(i));// משבצות בשורה למטה
-            if(!GameView.getcolorFromName((width+""+(i)), board).equals("none")) { break; }// במידה והחייל מגיע למשבצת עם חייל שך השחקן השני, הוא יוכל לעלות על המשבצת אבל לא להמשיך
-        }
-
-        for(int i=width+1; i<9; i++){
-            if(GameView.getcolorFromName((i+""+(hieght)), board).equals(this.getColor())){
-                break;// אם יש על המשבצת שחקן מאותו הצבע הוא חוסם את הדרך וצריך לצאת מהללולאה
-            }
-            posiblleNames.add(i+""+(hieght));// משבצות בשורה ימינה
-            if(!GameView.getcolorFromName((i+""+(hieght)), board).equals("none")) { break; }// במידה והחייל מגיע למשבצת עם חייל שך השחקן השני, הוא יוכל לעלות על המשבצת אבל לא להמשיך
-        }
-        for(int i=width-1; i>0; i--){
-            if(GameView.getcolorFromName((i+""+(hieght)), board).equals(this.getColor())){
-                break;// אם יש על המשבצת שחקן מאותו הצבע הוא חוסם את הדרך וצריך לצאת מהללולאה
-            }
-            posiblleNames.add(i+""+(hieght));// משבצות בשורה שמאלה
-            if(!GameView.getcolorFromName((i+""+(hieght)), board).equals("none")) { break; }// במידה והחייל מגיע למשבצת עם חייל שך השחקן השני, הוא יוכל לעלות על המשבצת אבל לא להמשיך
         }
 
+        // BOTTOM ROW
+        for(int i=hieght-1; i>0; i--)
+        {
+            // If a soldier of the same player blocks the soldier who wants to move
+            if(GameView.getcolorFromName((width+""+(i)), board).equals(this.getColor()))
+            {
+                break;
+            }
+            posiblleNames.add(width+""+(i));
 
-        for(int i=0; i<posiblleNames.size(); i++){
+            // If there is a soldier of the opponent in the bottom row, the soldier will eat him and stop
+            if(!GameView.getcolorFromName((width+""+(i)), board).equals("none"))
+            {
+                break;
+            }
+        }
 
-            // שני התנאים הבאים מוודאים שכל המשבצות שעתידות להכנס לרשימה המוחזרת, עונות על תנאי הלוח ולא חורגות ממסגרתו
-            if(posiblleNames.get(i).contains("-")){
-                collectionName.add(posiblleNames.get(i));
+        //RIGHT ROW
+        for(int i=width+1; i<9; i++)
+        {
+            // If a soldier of the same player blocks the soldier who wants to move
+            if(GameView.getcolorFromName((i+""+(hieght)), board).equals(this.getColor()))
+            {
+                break;
+            }
+            posiblleNames.add(i+""+(hieght));
+
+            // If there is a soldier of the opponent in the right row, the soldier will eat him and stop
+            if(!GameView.getcolorFromName((i+""+(hieght)), board).equals("none"))
+            {
+                break;
+            }
+        }
+
+        //LEFT ROW
+        for(int i=width-1; i>0; i--)
+        {
+            // If a soldier of the same player blocks the soldier who wants to move
+            if(GameView.getcolorFromName((i+""+(hieght)), board).equals(this.getColor()))
+            {
+                break;
+            }
+            posiblleNames.add(i+""+(hieght));
+
+            // If there is a soldier of the opponent in the right row, the soldier will eat him and stop
+            if(!GameView.getcolorFromName((i+""+(hieght)), board).equals("none"))
+            {
+                break;
+            }
+        }
+
+        // The following two conditions ensure that all the squares that are to be included in the returned list meet the conditions of the board and do not exceed its scope.
+        for(String name : posiblleNames)
+        {
+            if(name.contains("-"))
+            {
+                collectionName.add(name);
             }
 
-            if((Integer.parseInt(posiblleNames.get(i))/10)>8 || (Integer.parseInt(posiblleNames.get(i))%10)>8){
-                collectionName.add(posiblleNames.get(i));
+            if((Integer.parseInt(name) / 10) > 8 || (Integer.parseInt(name) % 10) > 8)
+            {
+                collectionName.add(name);
 
-            } }
+            }
+        }
 
         posiblleNames.removeAll(collectionName);
 
-        //  בשביל לוודא שבאמת אפשר לזוז למשבצות המצויינות, נוודא שאין שם עוד שחקן בצבע זהה
-        for(int i=0; i<board.size(); i++){
-            for(int j=0; j<posiblleNames.size(); j++){
-                if(posiblleNames.get(j).equals(board.get(i).getName())){
-                    if(!board.get(i).getColorOn().equals(this.getColor())){
+        //  We will convert all the names of the possible squares to a square type object
+        for(int i=0; i<board.size(); i++)
+        {
+            for(int j=0; j<posiblleNames.size(); j++)
+            {
+                if(posiblleNames.get(j).equals(board.get(i).getName()))
+                {
                         canMove.add(board.get(i));
                         break;
 
-                    } } } }
+                }
+            }
+        }
 
         return canMove;
+    }
+
+    /**
+     * @return A soldier-type object with the same values as the current soldier
+     */
+    public Rook copyPiece(){
+        return new Rook(
+                this.getName(),
+                this.getBm(),
+                this.getX(),
+                this.getY(),
+                this.getColor(),
+                new Board(this.getBoard()));
     }
 }

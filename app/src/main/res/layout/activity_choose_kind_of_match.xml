@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/mainbackground"
+    tools:context=".ChooseKindOfMatch">
+
+    <ImageView
+        android:id="@+id/btn_single"
+        android:src="@drawable/singlebtn"
+        android:layout_width="257dp"
+        android:layout_height="70dp"
+        android:layout_above="@id/divider"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+
+        android:contentDescription="@string/single_player" />
+
+    <ImageView
+        android:id="@+id/btn_multi"
+        android:src="@drawable/multibtn"
+        android:layout_width="257dp"
+        android:layout_height="70dp"
+        android:layout_below="@id/divider"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+
+        android:contentDescription="@string/single_player" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_centerInParent="true"
+        android:background="?android:attr/listDivider" />
+</RelativeLayout>
